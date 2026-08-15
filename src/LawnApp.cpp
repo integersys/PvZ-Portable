@@ -1699,7 +1699,8 @@ void LawnApp::LoadingThreadProc()
 	if (!PvzpLoadResources("LoaderBar"))
 		return;
 
-	PvzpStringListLoad("Properties/LawnStrings.txt");
+	if (!PvzpStringListReadFile("Properties/LawnStrings.txt"))
+		PvzpStringListLoad("languages/english.lang");
 	PvzpStringListReadFile("Properties/ZombatarTOS.txt");
 
 	// Load localized properties AFTER LawnStrings so they can override string values
