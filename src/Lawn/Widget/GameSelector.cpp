@@ -62,13 +62,16 @@ GameSelectorOverlay::GameSelectorOverlay(GameSelector* theGameSelector)
 GameSelector::GameSelector(LawnApp* theApp)
 {
 	PvzpHesitationTrace("pregameselector");
-	mLoadedResourceNames.push_back("DelayLoad_Zombatar");
+	bool aHasZombatar = theApp->mResourceManager->GetNumResources("DelayLoad_Zombatar") > 0;
+	if (aHasZombatar)
+		mLoadedResourceNames.push_back("DelayLoad_Zombatar");
 	mLoadedResourceNames.push_back("DelayLoad_Almanac");
 
 	for (std::string& resource : mLoadedResourceNames)
 		PvzpLoadResources(resource.c_str());
 
 	mApp = theApp;
+	mZombatarWidget = nullptr;
 	mLevel = 1;
 	mLoading = false;
 	mHasTrophy = false;
@@ -344,7 +347,8 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mStartY = 0;
 	mDestX = 0;
 	mDestY = 0;
-	mZombatarWidget = new ZombatarWidget(this);
+	if (aHasZombatar)
+		mZombatarWidget = new ZombatarWidget(this);
 	mAchievementsWidget = new AchievementsWidget(this->mApp);
 	mAchievementsWidget->Move(0, mApp->mHeight);
 
@@ -389,8 +393,9 @@ void GameSelector::SyncButtons()
 	mAlmanacButton->mVisible = aAlmanacAvailable;
 	mStoreButton->mDisabled = !aStoreOpen;
 	mStoreButton->mVisible = aStoreOpen;
-	mZombatarButton->mDisabled = false;
-	mZombatarButton->mVisible = true;
+	bool aHasZombatar = mApp->mResourceManager->GetNumResources("DelayLoad_Zombatar") > 0;
+	mZombatarButton->mDisabled = !aHasZombatar;
+	mZombatarButton->mVisible = aHasZombatar;
 
 	Reanimation* aSelectorReanim = mApp->ReanimationGet(mSelectorReanimID);
 	if (aAlmanacAvailable)
@@ -753,7 +758,8 @@ void GameSelector::Update()
 		int aNewY = PvzpAnimateCurve(75, 0, mSlideCounter, mStartY, mDestY, PvzpCurves::CURVE_EASE_IN_OUT);
 		Move(aNewX, aNewY);
 
-		mZombatarWidget->Move(aNewX + BOARD_WIDTH, aNewY);
+		if (mZombatarWidget)
+			mZombatarWidget->Move(aNewX + BOARD_WIDTH, aNewY);
 		mAchievementsWidget->mY = aNewY + mApp->mHeight;
 
 		mSlideCounter--;
@@ -839,7 +845,7 @@ void GameSelector::Update()
 			mStoreButton->mMouseVisible = true;
 			mAlmanacButton->mMouseVisible = true;
 			mChangeUserButton->mMouseVisible = true;
-			mZombatarButton->mMouseVisible = true;
+			mZombatarButton->mMouseVisible = mZombatarButton->mVisible;
 			mAchievementsButton->mMouseVisible = true;
 
 			if (mApp->mPlayerInfo == nullptr)
@@ -957,7 +963,8 @@ void GameSelector::AddedToManager(WidgetManager* theWidgetManager)
 {
 	Widget::AddedToManager(theWidgetManager);
 
-	theWidgetManager->AddWidget(mZombatarWidget);
+	if (mZombatarWidget)
+		theWidgetManager->AddWidget(mZombatarWidget);
 	theWidgetManager->AddWidget(mAchievementsWidget);
 }
 
@@ -965,14 +972,16 @@ void GameSelector::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
 
-	theWidgetManager->RemoveWidget(mZombatarWidget);
+	if (mZombatarWidget)
+		theWidgetManager->RemoveWidget(mZombatarWidget);
 	theWidgetManager->RemoveWidget(mAchievementsWidget);
 }
 
 void GameSelector::OrderInManagerChanged()
 {
 	mWidgetManager->PutInfront(mAchievementsWidget, this);
-	mWidgetManager->BringToFront(mZombatarWidget);
+	if (mZombatarWidget)
+		mWidgetManager->BringToFront(mZombatarWidget);
 }
 
 void GameSelector::KeyDown(KeyCode theKey)
