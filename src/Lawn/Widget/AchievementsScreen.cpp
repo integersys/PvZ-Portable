@@ -136,7 +136,8 @@ void AchievementsWidget::Draw(Graphics* g) {
 		int aTextYPos = aImageYPos + 16;
 
 		// Achievement images
-		Rect aSrcRect(70 * (i % 7), 70 * (i / 7), 70, 70);
+		int aIconCols = std::max(1, IMAGE_ACHEESEMENTS_ICONS->mWidth / 70);
+		Rect aSrcRect(70 * (i % aIconCols), 70 * (i / aIconCols), 70, 70);
 		Rect aDestRect(aImageXPos, aImageYPos, 56, 56);
 
 		g->SetColorizeImages(true);
