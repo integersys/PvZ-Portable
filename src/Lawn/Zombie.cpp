@@ -157,7 +157,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
 
 	mFromWave = theFromWave;
 	mRow = theRow;
-	mPosX = 780 + Rand(ZOMBIE_START_RANDOM_OFFSET);
+	mPosX = 780 + BOARD_ADDITIONAL_WIDTH + Rand(ZOMBIE_START_RANDOM_OFFSET);
 	mPosY = GetPosYBasedOnRow(theRow);
 	mVelX = 0.0f;
 	mVelZ = 0.0f;

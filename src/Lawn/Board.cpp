@@ -69,6 +69,52 @@ constexpr const int FLAG_RAISE_TIME = 100;
 
 bool gShownMoreSunTutorial = false;
 
+static Board* gSewerCynBushBoard = nullptr;
+static ReanimationID gSewerCynBushReanimID[6] = {
+	ReanimationID::REANIMATIONID_NULL,
+	ReanimationID::REANIMATIONID_NULL,
+	ReanimationID::REANIMATIONID_NULL,
+	ReanimationID::REANIMATIONID_NULL,
+	ReanimationID::REANIMATIONID_NULL,
+	ReanimationID::REANIMATIONID_NULL
+};
+
+static void SewerCynAddBushReanimations(Board* theBoard)
+{
+	if (gSewerCynBushBoard == theBoard)
+	{
+		for (ReanimationID& aID : gSewerCynBushReanimID)
+		{
+			Reanimation* aReanim = theBoard->mApp->ReanimationTryToGet(aID);
+			if (aReanim)
+				aReanim->ReanimationDie();
+			aID = ReanimationID::REANIMATIONID_NULL;
+		}
+	}
+	else
+	{
+		for (ReanimationID& aID : gSewerCynBushReanimID)
+			aID = ReanimationID::REANIMATIONID_NULL;
+	}
+	gSewerCynBushBoard = theBoard;
+	if (theBoard->mBackground != BackgroundType::BACKGROUND_1_DAY && theBoard->mBackground != BackgroundType::BACKGROUND_2_NIGHT && theBoard->mBackground != BackgroundType::BACKGROUND_3_POOL && theBoard->mBackground != BackgroundType::BACKGROUND_4_FOG)
+		return;
+	static constexpr int aFiveRow[6][2] = {{840, -20}, {852, 108}, {858, 198}, {862, 318}, {854, 399}, {870, 450}};
+	static constexpr int aSixRow[6][2] = {{842, -18}, {854, 110}, {858, 198}, {864, 320}, {856, 401}, {869, 449}};
+	static constexpr ReanimationType aDay[3] = {ReanimationType::REANIM_BUSH3, ReanimationType::REANIM_BUSH5, ReanimationType::REANIM_BUSH4};
+	static constexpr ReanimationType aNight[3] = {ReanimationType::REANIM_BUSH3_NIGHT, ReanimationType::REANIM_BUSH5_NIGHT, ReanimationType::REANIM_BUSH4_NIGHT};
+	const int (*aPos)[2] = theBoard->StageHas6Rows() ? aSixRow : aFiveRow;
+	const ReanimationType* aTypes = theBoard->StageIsNight() ? aNight : aDay;
+	for (int i = 0; i < 6; i++)
+	{
+		int aRenderOrder = Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, i + 1, 0);
+		Reanimation* aReanim = theBoard->mApp->AddReanimation(static_cast<float>(aPos[i][0]), static_cast<float>(aPos[i][1]), aRenderOrder, aTypes[i % 3]);
+		aReanim->mAnimRate = 0.0f;
+		gSewerCynBushReanimID[i] = theBoard->mApp->ReanimationGetID(aReanim);
+	}
+}
+
+
 Board::Board(LawnApp* theApp)
 {
 	mApp = theApp;
@@ -202,19 +248,19 @@ Board::Board(LawnApp* theApp)
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
 		mMenuButton->SetLabel("[MAIN_MENU_BUTTON]");
-		mMenuButton->Resize(628, -10, 163, 46);
+		mMenuButton->Resize(628 + BOARD_ADDITIONAL_WIDTH * 2, -10, 163, 46);
 
 		mStoreButton = new GameButton(1);
 		mStoreButton->mButtonImage = IMAGE_ZENSHOPBUTTON;
 		mStoreButton->mOverImage = IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
 		mStoreButton->mDownImage = IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
 		mStoreButton->mParentWidget = this;
-		mStoreButton->Resize(678, 33, IMAGE_ZENSHOPBUTTON->mWidth, 40);
+		mStoreButton->Resize(678 + BOARD_ADDITIONAL_WIDTH * 2, 33, IMAGE_ZENSHOPBUTTON->mWidth, 40);
 	}
 	else
 	{
 		mMenuButton->SetLabel("[MENU_BUTTON]");
-		mMenuButton->Resize(681, -10, 117, 46);
+		mMenuButton->Resize(681 + BOARD_ADDITIONAL_WIDTH * 2, -10, 117, 46);
 	}
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_LAST_STAND)
@@ -228,7 +274,7 @@ Board::Board(LawnApp* theApp)
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
 	{
 		mMenuButton->SetLabel("[MAIN_MENU_BUTTON]");
-		mMenuButton->Resize(628, -10, 163, 46);
+		mMenuButton->Resize(628 + BOARD_ADDITIONAL_WIDTH * 2, -10, 163, 46);
 
 		mStoreButton = new GameButton(1);
 		mStoreButton->mDrawStoneButton = true;
@@ -392,6 +438,7 @@ bool Board::LoadGame(const std::string& theFileName)
 		return false;
 
 	LoadBackgroundImages();
+	SewerCynAddBushReanimations(this);
 	mApp->ClearUpdateBacklog();
 	ResetFPSStats();
 	UpdateLayers();
@@ -1161,6 +1208,7 @@ void Board::PickBackground()
 		}
 	}
 	PickSpecialGraveStone();
+	SewerCynAddBushReanimations(this);
 }
 
 void Board::InitZombieWavesForLevel(int theForLevel)
@@ -5232,7 +5280,7 @@ void Board::UpdateSunSpawning()
 	mNumSunsFallen++;
 	mSunCountDown = std::min(SUN_COUNTDOWN_MAX, SUN_COUNTDOWN + mNumSunsFallen * 10) + Rand(SUN_COUNTDOWN_RANGE);
 	CoinType aSunType = mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_SUNNY_DAY ? CoinType::COIN_LARGESUN : CoinType::COIN_SUN;
-	AddCoin(RandRangeInt(100, 649), 60, aSunType, CoinMotion::COIN_MOTION_FROM_SKY);
+	AddCoin(RandRangeInt(100 + BOARD_ADDITIONAL_WIDTH, 649 + BOARD_ADDITIONAL_WIDTH), 60, aSunType, CoinMotion::COIN_MOTION_FROM_SKY);
 }
 
 void Board::NextWaveComing()
@@ -5241,7 +5289,7 @@ void Board::NextWaveComing()
 	{
 		if (!IsSurvivalStageWithRepick() && mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_LAST_STAND && !mApp->IsContinuousChallenge())
 		{
-			mApp->AddReanimation(0, 30, MakeRenderOrder(RenderLayer::RENDER_LAYER_ABOVE_UI, 0, 0), ReanimationType::REANIM_FINAL_WAVE);
+			mApp->AddReanimation(BOARD_ADDITIONAL_WIDTH, BOARD_OFFSET_Y, MakeRenderOrder(RenderLayer::RENDER_LAYER_ABOVE_UI, 0, 0), ReanimationType::REANIM_FINAL_WAVE);
 			mFinalWaveSoundCounter = 60;
 		}
 	}
@@ -5800,7 +5848,7 @@ void Board::Update()
 	if (mBackground == BackgroundType::BACKGROUND_3_POOL && mPoolSparklyParticleID == ParticleSystemID::PARTICLESYSTEMID_NULL)
 	{
 		int aRenderPosition = MakeRenderOrder(RenderLayer::RENDER_LAYER_GROUND, 2, 0);
-		PvzpParticleSystem* aPoolParticle = mApp->AddPvzpParticle(450, 295, aRenderPosition, ParticleEffect::PARTICLE_POOL_SPARKLY);
+		PvzpParticleSystem* aPoolParticle = mApp->AddPvzpParticle(450 + BOARD_ADDITIONAL_WIDTH, 295 + BOARD_OFFSET_Y, aRenderPosition, ParticleEffect::PARTICLE_POOL_SPARKLY);
 		mPoolSparklyParticleID = mApp->ParticleGetID(aPoolParticle);
 	}
 
@@ -5894,22 +5942,22 @@ void Board::DrawBackdrop(Graphics* g)
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, -BOARD_OFFSET, 0);
 		int aWidth = PvzpAnimateCurve(0, 1000, mSodPosition, 0, Sexy::IMAGE_SOD1ROW->GetWidth(), PvzpCurves::CURVE_LINEAR);
 		Rect aSrcRect(0, 0, aWidth, Sexy::IMAGE_SOD1ROW->GetHeight());
-		g->DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET, 265, aSrcRect);
+		g->DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET + BOARD_ADDITIONAL_WIDTH, 265, aSrcRect);
 	}
 	else if (((mLevel == 2 || mLevel == 3) && mApp->IsFirstTimeAdventureMode()) || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED)
 	{
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, -BOARD_OFFSET, 0);
-		g->DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET, 265);
+		g->DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET + BOARD_ADDITIONAL_WIDTH, 265);
 		int aWidth = PvzpAnimateCurve(0, 1000, mSodPosition, 0, Sexy::IMAGE_SOD3ROW->GetWidth(), PvzpCurves::CURVE_LINEAR);
 		Rect aSrcRect(0, 0, aWidth, Sexy::IMAGE_SOD3ROW->GetHeight());
-		g->DrawImage(Sexy::IMAGE_SOD3ROW, 235 - BOARD_OFFSET, 149, aSrcRect);
+		g->DrawImage(Sexy::IMAGE_SOD3ROW, 235 - BOARD_OFFSET + BOARD_ADDITIONAL_WIDTH, 149, aSrcRect);
 	}
 	else if (mLevel == 4 && mApp->IsFirstTimeAdventureMode())
 	{
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, -BOARD_OFFSET, 0);
-		g->DrawImage(Sexy::IMAGE_SOD3ROW, 235 - BOARD_OFFSET, 149);
+		g->DrawImage(Sexy::IMAGE_SOD3ROW, 235 - BOARD_OFFSET + BOARD_ADDITIONAL_WIDTH, 149);
 		int aWidth = PvzpAnimateCurve(0, 1000, mSodPosition, 0, 773, PvzpCurves::CURVE_LINEAR);
-		Rect aSrcRect(232, 0, aWidth, Sexy::IMAGE_BACKGROUND1->GetHeight());
+		Rect aSrcRect(232, 0, aWidth + BOARD_ADDITIONAL_WIDTH, Sexy::IMAGE_BACKGROUND1->GetHeight());
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1, 232 - BOARD_OFFSET, 0, aSrcRect);
 	}
 	else if (aBgImage)
@@ -5930,14 +5978,18 @@ void Board::DrawBackdrop(Graphics* g)
 	}
 	if (StageHasPool())
 	{
+		g->mTransX += BOARD_ADDITIONAL_WIDTH;
+		g->mTransY += BOARD_OFFSET_Y;
 		mApp->mPoolEffect->PoolEffectDraw(g, StageIsNight());
+		g->mTransX -= BOARD_ADDITIONAL_WIDTH;
+		g->mTransY -= BOARD_OFFSET_Y;
 	}
 	if (mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PLANT_PEASHOOTER)
 	{
 		Graphics aClipG(*g);
 		aClipG.SetColorizeImages(true);
 		aClipG.SetColor(GetFlashingColor(mMainCounter, 75));
-		aClipG.DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET, 265);
+		aClipG.DrawImage(Sexy::IMAGE_SOD1ROW, 239 - BOARD_OFFSET + BOARD_ADDITIONAL_WIDTH, 265 + BOARD_OFFSET_Y);
 		aClipG.SetColorizeImages(false);
 	}
 	mChallenge->DrawBackdrop(g);
@@ -6558,6 +6610,10 @@ void Board::DrawProgressMeter(Graphics* g)
 	if (!HasProgressMeter())
 		return;
 
+	Graphics aWideMeter(*g);
+	aWideMeter.mTransX += BOARD_ADDITIONAL_WIDTH * 2;
+	g = &aWideMeter;
+
 	g->DrawImageCel(Sexy::IMAGE_FLAGMETER, 600, 575, 0);
 	int aCelWidth = Sexy::IMAGE_FLAGMETER->GetCelWidth();
 	int aCelHeight = Sexy::IMAGE_FLAGMETER->GetCelHeight();
@@ -6663,7 +6719,7 @@ void Board::DrawLevel(Graphics* g)
 	std::string aLevelStr;
 	if (mApp->IsAdventureMode())
 	{
-		aLevelStr = PvzpStringTranslate("[LEVEL]") + " " + mApp->GetStageString(mLevel);
+		aLevelStr = PvzpReplaceString("[LEVEL]", "{LEVEL}", mApp->GetStageString(mLevel));
 	}
 	else
 	{
@@ -6693,11 +6749,11 @@ void Board::DrawLevel(Graphics* g)
 		}
 	}
 
-	int aPosX = 780;
-	int aPosY = 595;
+	int aPosX = BOARD_WIDTH - 20;
+	int aPosY = BOARD_HEIGHT - 5;
 	if (HasProgressMeter())
 	{
-		aPosX = 593;
+		aPosX = BOARD_WIDTH - 207;
 	}
 	if (mChallenge->mChallengeState == ChallengeState::STATECHALLENGE_ZEN_FADING)
 	{
@@ -7141,12 +7197,12 @@ void Board::DrawTopRightUI(Graphics* g)
 		if (mChallenge->mChallengeState == STATECHALLENGE_ZEN_FADING)
 		{
 			mMenuButton->mY = PvzpAnimateCurve(50, 0, mChallenge->mChallengeStateCounter, -10, -50, PvzpCurves::CURVE_EASE_IN_OUT);
-			mStoreButton->mX = PvzpAnimateCurve(50, 0, mChallenge->mChallengeStateCounter, 678, 800, PvzpCurves::CURVE_EASE_IN_OUT);
+			mStoreButton->mX = PvzpAnimateCurve(50, 0, mChallenge->mChallengeStateCounter, 678 + BOARD_ADDITIONAL_WIDTH * 2, BOARD_WIDTH, PvzpCurves::CURVE_EASE_IN_OUT);
 		}
 		else
 		{
 			mMenuButton->mY = -10;
-			mStoreButton->mX = 678;
+			mStoreButton->mX = 678 + BOARD_ADDITIONAL_WIDTH * 2;
 		}
 	}
 
@@ -8816,10 +8872,11 @@ int Board::PixelToGridX(int theX, int theY)
 		}
 	}
 
-	if (theX < LAWN_XMIN)
+	if (theX < LAWN_XMIN + BOARD_ADDITIONAL_WIDTH ||
+		theX > BOARD_WIDTH - BOARD_ADDITIONAL_WIDTH - LAWN_XMIN)
 		return -1;
 
-	return std::clamp((theX - LAWN_XMIN) / 80, 0, MAX_GRID_SIZE_X - 1);
+	return std::clamp((theX - LAWN_XMIN - BOARD_ADDITIONAL_WIDTH) / 80, 0, MAX_GRID_SIZE_X - 1);
 }
 
 int Board::PixelToGridXKeepOnBoard(int theX, int theY)
@@ -8882,7 +8939,7 @@ int Board::GridToPixelX(int theGridX, int theGridY)
 		}
 	}
 
-	return theGridX * 80 + LAWN_XMIN;
+	return theGridX * 80 + LAWN_XMIN + BOARD_ADDITIONAL_WIDTH;
 }
 
 float Board::GetPosYBasedOnRow(float thePosX, int theRow)
@@ -8890,9 +8947,9 @@ float Board::GetPosYBasedOnRow(float thePosX, int theRow)
 	if (StageHasRoof())
 	{
 		float aSlopeOffset = 0.0f;
-		if (thePosX < 440.0f)
+		if (thePosX < 440.0f + BOARD_ADDITIONAL_WIDTH)
 		{
-			aSlopeOffset = (440.0f - thePosX) * 0.25f;
+			aSlopeOffset = (440.0f + BOARD_ADDITIONAL_WIDTH - thePosX) * 0.25f;
 		}
 
 		return GridToPixelY(8, theRow) + aSlopeOffset;

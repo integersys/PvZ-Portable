@@ -143,7 +143,7 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 	mStartButton->SetFont(Sexy::FONT_DWARVENTODCRAFT15);
 	mStartButton->mColors[ButtonWidget::COLOR_LABEL] = Color(213, 159, 43);
 	mStartButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(213, 159, 43);
-	mStartButton->Resize(324, 500, 156, 42);
+	mStartButton->Resize(324 + BOARD_ADDITIONAL_WIDTH, 500, 156, 42);
 	mStartButton->mTextOffsetY = -1;
 
 	mContinueButton = new GameButton(AwardScreen::AwardScreen_Start);
@@ -155,7 +155,7 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 	mContinueButton->SetFont(Sexy::FONT_DWARVENTODCRAFT15);
 	mContinueButton->mColors[ButtonWidget::COLOR_LABEL] = Color(213, 159, 43);
 	mContinueButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(213, 159, 43);
-	mContinueButton->Resize(324, 515, 156, 42);
+	mContinueButton->Resize(324 + BOARD_ADDITIONAL_WIDTH, 515, 156, 42);
 	mContinueButton->mParentWidget = this;
 	mContinueButton->mTextOffsetY = -1;
 	mContinueButton->mBtnNoDraw = true;
@@ -273,7 +273,7 @@ void AwardScreen::DrawBottom(Graphics* g, std::string_view theTitle, std::string
 	g->DrawImage(Sexy::IMAGE_AWARDSCREEN_BACK, 0, 0);
 	PvzpDrawString(g, theTitle, BOARD_WIDTH / 2, 58, Sexy::FONT_DWARVENTODCRAFT24, Color(213, 159, 43), DS_ALIGN_CENTER);
 	PvzpDrawString(g, theAward, BOARD_WIDTH / 2, 326, Sexy::FONT_DWARVENTODCRAFT18YELLOW, Color::White, DS_ALIGN_CENTER);
-	PvzpDrawStringWrapped(g, theMessage, Rect(285, 360, 230, 90), Sexy::FONT_BRIANNETOD16, Color(40, 50, 90), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
+	PvzpDrawStringWrapped(g, theMessage, Rect(285 + BOARD_ADDITIONAL_WIDTH, 360, 230, 90), Sexy::FONT_BRIANNETOD16, Color(40, 50, 90), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
 }
 
 void AwardScreen::DrawAwardSeed(Graphics* g)
@@ -288,7 +288,7 @@ void AwardScreen::DrawAwardSeed(Graphics* g)
 	DrawBottom(g, "[NEW_PLANT]", aAward, aMessage);
 
 	g->SetScale(2, 2, 350, 129);
-	DrawSeedPacket(g, 350, 129, aSeedType, SEED_NONE, 0, 255, true, false);
+	DrawSeedPacket(g, 350 + BOARD_ADDITIONAL_WIDTH, 129, aSeedType, SEED_NONE, 0, 255, true, false);
 	g->SetScale(1, 1, 0, 0);
 }
 
@@ -619,13 +619,13 @@ void AwardScreen::DrawAchievements(Graphics* g) {
 		std::string aAchievementDesc = std::string(gAchievementList[mAchievementItems[i].mId].description);
 		aAchievementName.append(" Earned!");
 
-		Rect aSrcRect = Rect(70 * (mAchievementItems[i].mId % 7), 70 * (mAchievementItems[i].mId / 7), 70, 70);
-		Rect aDestRect = Rect(220, mAchievementItems[i].mY + 10, 70, 70);
-		Rect aTextRect = Rect(300, mAchievementItems[i].mY + 20, 300, 60);
+		Rect aSrcRect = Rect(70 * mAchievementItems[i].mId, 0, 70, 70);
+		Rect aDestRect = Rect(220 + BOARD_ADDITIONAL_WIDTH, mAchievementItems[i].mY + 10, 70, 70);
+		Rect aTextRect = Rect(300 + BOARD_ADDITIONAL_WIDTH, mAchievementItems[i].mY + 20, 300, 60);
 
 		g->DrawImage(IMAGE_ACHEESEMENTS_ICONS, aDestRect, aSrcRect);
 
-		PvzpDrawString(g, aAchievementName, 450, mAchievementItems[i].mY + 25, FONT_DWARVENTODCRAFT15, Color(224, 187, 98), DS_ALIGN_CENTER);
+		PvzpDrawString(g, aAchievementName, 450 + BOARD_ADDITIONAL_WIDTH, mAchievementItems[i].mY + 25, FONT_DWARVENTODCRAFT15, Color(224, 187, 98), DS_ALIGN_CENTER);
 		PvzpDrawStringWrapped(g, aAchievementDesc, aTextRect, FONT_DWARVENTODCRAFT12, Color(255, 255, 255), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
 	}
 }
