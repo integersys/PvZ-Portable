@@ -5353,24 +5353,50 @@ void Board::UpdateZombieSpawning()
 			}
 			else
 			{
-				if (mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_DAY_GRASSWALK ||
-					mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_POOL_WATERYGRAVES ||
-					mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_FOG_RIGORMORMIST ||
-					mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_ROOF_GRAZETHEROOF)
+				MusicTune aTune = mApp->mMusic->mCurMusicTune;
+				if (aTune >= MusicTune::MUSIC_TUNE_DAY_GRASSWALK && aTune <= MusicTune::MUSIC_TUNE_ROOF_GRAZETHEROOF)
 				{
 					if (mHugeWaveCountDown == 400)
 					{
 						mApp->mMusic->StartBurst();
 					}
-				}
-				else if (mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS)
-				{
-					if (mHugeWaveCountDown == 700)
+					else if (mHugeWaveCountDown == 100)
 					{
-						mApp->mMusic->StartBurst();
+						MusicTune aNextTune = MusicTune::MUSIC_TUNE_NONE;
+						switch (aTune)
+						{
+						case MusicTune::MUSIC_TUNE_DAY_GRASSWALK:
+							aNextTune = MusicTune::MUSIC_TUNE_GRASSWALK_WAVE2;
+							break;
+						case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE2:
+							aNextTune = MusicTune::MUSIC_TUNE_GRASSWALK_WAVE3;
+							break;
+						case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE3:
+							aNextTune = MusicTune::MUSIC_TUNE_GRASSWALK_WAVE4;
+							break;
+						case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE4:
+							aNextTune = MusicTune::MUSIC_TUNE_GRASSWALK_WAVE5;
+							break;
+						case MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS:
+							aNextTune = MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE2;
+							break;
+						case MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE2:
+							aNextTune = MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE3;
+							break;
+						default:
+							break;
+						}
+
+						if (aNextTune != MusicTune::MUSIC_TUNE_NONE)
+						{
+							mApp->mMusic->StopAllMusic();
+							mApp->mMusic->PlayMusic(aNextTune, -1, -1);
+							mApp->mMusic->mFadeOutCounter = 0;
+							mApp->mMusic->mFadeOutDuration = 0;
+						}
 					}
+					return;
 				}
-				return;
 			}
 		}
 	}

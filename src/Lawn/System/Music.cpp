@@ -63,7 +63,21 @@ struct MusicLoadEntry
 static constexpr int MUSIC_LOADING_TASK_WEIGHT = 3500;
 static constexpr MusicLoadEntry MUSIC_LOADING_FILES[] = {
 	{MusicFile::MUSIC_FILE_DRUMS, "sounds/mainmusic.mo3"},
-	{MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN, "sounds/ZombiesOnYourLawn.ogg"}
+	{MusicFile::MUSIC_FILE_HIHATS, "sounds/mainmusic_hihats.mo3"},
+	{MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN, "sounds/ZombiesOnYourLawn.ogg"},
+	{MusicFile::MUSIC_FILE_CHOOSE_YOUR_SEEDS, "music/2_seed_chooser.ogg"},
+	{MusicFile::MUSIC_FILE_LOONBOON, "music/5_loonboon.ogg"},
+	{MusicFile::MUSIC_FILE_CONVEYOR, "music/6_conveyor.ogg"},
+	{MusicFile::MUSIC_FILE_ZEN_GARDEN, "music/7_zen_garden.ogg"},
+	{MusicFile::MUSIC_FILE_DAY_GRASSWALK, "music/3_grasswalk_wave1.ogg"},
+	{MusicFile::MUSIC_FILE_GRASSWALK_WAVE2, "music/3_grasswalk_wave2.ogg"},
+	{MusicFile::MUSIC_FILE_GRASSWALK_WAVE3, "music/3_grasswalk_wave3.ogg"},
+	{MusicFile::MUSIC_FILE_GRASSWALK_WAVE4, "music/3_grasswalk_wave4.ogg"},
+	{MusicFile::MUSIC_FILE_GRASSWALK_WAVE5, "music/3_grasswalk_wave5.ogg"},
+	{MusicFile::MUSIC_FILE_NIGHT_MOONGRAINS, "music/4_moongrains_wave1.ogg"},
+	{MusicFile::MUSIC_FILE_MOONGRAINS_WAVE2, "music/4_moongrains_wave2.ogg"},
+	{MusicFile::MUSIC_FILE_MOONGRAINS_WAVE3, "music/4_moongrains_wave2.ogg"},
+	{MusicFile::MUSIC_FILE_MOONGRAINS_WAVE4, "music/4_moongrains_wave4.ogg"}
 };
 
 const int Music::MUSIC_LOADING_TASKS = MUSIC_LOADING_TASK_WEIGHT * static_cast<int>(sizeof(MUSIC_LOADING_FILES) / sizeof(MUSIC_LOADING_FILES[0]));
@@ -91,14 +105,10 @@ bool Music::PvzpLoadMusic(MusicFile theMusicFile, std::string_view theFileName)
 	p_fclose(pFile);
 
 	aHMusic = Mix_LoadMUS_RW(SDL_RWFromMem(aData, aSize), 1);
-	if (theMusicFile == MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN)
-	{
+	if (anExt == "ogg")
 		gMusicFileData[theMusicFile].mFileData = (unsigned int*)aData;
-	}
 	else
-	{
-		delete[] (char *)aData;
-	}
+		delete[] (char*)aData;
 
 	if (aHMusic == 0)
 		return false;
@@ -142,7 +152,7 @@ void Music::SetupVolumeForTune(MusicTune theMusicTune, float theDrumsVolume, flo
 		break;
 	}
 
-	Mix_Music* aHMusic = GetMusicHandle(MusicFile::MUSIC_FILE_MAIN_MUSIC);
+	Mix_Music* aHMusic = GetMusicHandle(mCurMusicFileMain);
 	for (int aTrack = 0; aTrack < TRACK_COUNT; aTrack++)
 	{
 		float aVolume;
@@ -182,7 +192,7 @@ void Music::LoadSong(MusicFile theMusicFile, std::string_view theFileName)
 
 void Music::MusicTitleScreenInit()
 {
-	LoadSong(MusicFile::MUSIC_FILE_MAIN_MUSIC, "sounds/mainmusic.mo3");
+	LoadSong(MusicFile::MUSIC_FILE_MAIN_MUSIC, "music/1_menu.ogg");
 	MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
 }
 
@@ -210,6 +220,8 @@ void Music::StopAllMusic()
 			mMusicInterface->StopMusic(mCurMusicFileMain);
 		if (mCurMusicFileDrums != MusicFile::MUSIC_FILE_NONE)
 			mMusicInterface->StopMusic(mCurMusicFileDrums);
+		if (mCurMusicFileHihats != MusicFile::MUSIC_FILE_NONE)
+			mMusicInterface->StopMusic(mCurMusicFileHihats);
 	}
 
 	mCurMusicTune = MusicTune::MUSIC_TUNE_NONE;
@@ -223,6 +235,7 @@ void Music::StopAllMusic()
 	mPauseOffsetDrums = 0;
 	mPaused = false;
 	mFadeOutCounter = 0;
+	mFadeOutDuration = 0;
 }
 
 Mix_Music* Music::GetMusicHandle(MusicFile theMusicFile)
@@ -240,20 +253,21 @@ void Music::PlayFromOffset(MusicFile theMusicFile, int theOffset, double theVolu
 	PVZP_ASSERT(anItr != anSDL->mMusicMap.end());
 	SDLMusicInfo* aMusicInfo = &anItr->second;
 
-	if (mCurMusicTune == MusicTune::MUSIC_TUNE_CREDITS_ZOMBIES_ON_YOUR_LAWN)
+	bool aDirectStream =
+		theMusicFile == MusicFile::MUSIC_FILE_MAIN_MUSIC ||
+		theMusicFile == MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN ||
+		theMusicFile >= MusicFile::MUSIC_FILE_DAY_GRASSWALK;
+
+	Mix_HaltMusicStream(aMusicInfo->mHMusic);
+	aMusicInfo->mStopOnFade = theMusicFile == MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN;
+	aMusicInfo->mVolume = aMusicInfo->mVolumeCap * theVolume;
+	aMusicInfo->mVolumeAdd = 0.0;
+	Mix_PlayMusicStream(aMusicInfo->mHMusic, aMusicInfo->mStopOnFade ? 0 : -1);
+	Mix_VolumeMusicStream(aMusicInfo->mHMusic, (int)(aMusicInfo->mVolume * 128));
+
+	if (!aDirectStream)
 	{
-		bool aNoLoop = theMusicFile == MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN;
-		mMusicInterface->PlayMusic(theMusicFile, theOffset, aNoLoop);
-	}
-	else
-	{
-		Mix_HaltMusicStream(aMusicInfo->mHMusic);
-		aMusicInfo->mStopOnFade = false;
-		aMusicInfo->mVolume = aMusicInfo->mVolumeCap * theVolume;
-		aMusicInfo->mVolumeAdd = 0.0;
-		Mix_PlayMusicStream(aMusicInfo->mHMusic, -1);
 		Mix_ModMusicStreamJumpToOrder(aMusicInfo->mHMusic, theOffset);
-		Mix_VolumeMusicStream(aMusicInfo->mHMusic, (int)(aMusicInfo->mVolume*128));
 		SetupVolumeForTune(mCurMusicTune, 0, 0);
 	}
 }
@@ -271,22 +285,66 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 	switch (theMusicTune)
 	{
 	case MusicTune::MUSIC_TUNE_DAY_GRASSWALK:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_DAY_GRASSWALK;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE2:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_GRASSWALK_WAVE2;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE3:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_GRASSWALK_WAVE3;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE4:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_GRASSWALK_WAVE4;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_GRASSWALK_WAVE5:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_GRASSWALK_WAVE5;
 		if (theOffset == -1)
 			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
-		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_NIGHT_MOONGRAINS;
 		if (theOffset == -1)
-		{
-			theOffset = 0x30;
-			theDrumsOffset = 0x5C;
-		}
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
-		PlayFromOffset(mCurMusicFileDrums, theDrumsOffset, 0.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE2:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_MOONGRAINS_WAVE2;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE3:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_MOONGRAINS_WAVE3;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		break;
+
+	case MusicTune::MUSIC_TUNE_MOONGRAINS_WAVE4:
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_MOONGRAINS_WAVE4;
+		if (theOffset == -1)
+			theOffset = 0;
+		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_POOL_WATERYGRAVES:
@@ -298,64 +356,72 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 
 	case MusicTune::MUSIC_TUNE_FOG_RIGORMORMIST:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
+		mCurMusicFileHihats = MusicFile::MUSIC_FILE_HIHATS;
 		if (theOffset == -1)
 			theOffset = 0x7D;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		PlayFromOffset(mCurMusicFileDrums, theOffset, 0.0);
+		PlayFromOffset(mCurMusicFileHihats, theOffset, 0.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_ROOF_GRAZETHEROOF:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
+		mCurMusicFileHihats = MusicFile::MUSIC_FILE_HIHATS;
 		if (theOffset == -1)
 			theOffset = 0xB8;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
+		PlayFromOffset(mCurMusicFileDrums, theOffset, 0.0);
+		PlayFromOffset(mCurMusicFileHihats, theOffset, 0.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_CHOOSE_YOUR_SEEDS:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_CHOOSE_YOUR_SEEDS;
 		if (theOffset == -1)
-			theOffset = 0x7A;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
 		if (theOffset == -1)
-			theOffset = 0x98;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_ZEN_GARDEN:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_ZEN_GARDEN;
 		if (theOffset == -1)
-			theOffset = 0xDD;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_PUZZLE_CEREBRAWL:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
 		if (theOffset == -1)
-			theOffset = 0xB1;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_MINIGAME_LOONBOON:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_LOONBOON;
 		if (theOffset == -1)
-			theOffset = 0xA6;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_CONVEYER:
-		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
+		mCurMusicFileMain = MusicFile::MUSIC_FILE_CONVEYOR;
 		if (theOffset == -1)
-			theOffset = 0xD4;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
 	case MusicTune::MUSIC_TUNE_FINAL_BOSS_BRAINIAC_MANIAC:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
 		if (theOffset == -1)
-			theOffset = 0x9E;
+			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
 		break;
 
