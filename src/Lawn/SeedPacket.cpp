@@ -221,6 +221,13 @@ void SeedPacketDrawSeed(Graphics* g, float x, float y, SeedType theSeedType, See
 		aImage = FilterEffectGetImage(aImage, aFilterEffect);
 	}
 
+	int aSewerCynPacketCel = (int)aSeedType;
+	if (aSewerCynPacketCel >= (int)SeedType::SEED_PEASHOOTER && aSewerCynPacketCel < (int)SeedType::SEED_IMITATER)
+	{
+		PvzpDrawImageCelScaledF(g, aImage, x, y, aSewerCynPacketCel, 0, g->mScaleX, g->mScaleY);
+		return;
+	}
+
 	if (aSeedType == SeedType::SEED_POTATOMINE && g->mScaleX <= 1.0f)
 	{
 		PvzpDrawImageCelScaledF(g, aImage, x, y, 0, 0, g->mScaleX, g->mScaleY);
@@ -311,7 +318,7 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 		theSeedType == SeedType::SEED_ZOMBIQUARIUM_SNORKLE ? 7 :
 		theSeedType == SeedType::SEED_ZOMBIQUARIUM_TROPHY ? 8 : 2;
 
-	if (g->mScaleX > 1)
+	if (aPacketBackground == 2)
 	{
 		PvzpDrawImageCelScaledF(g, Sexy::IMAGE_SEEDPACKET_LARGER, x, y, 0, 0, g->mScaleX * 0.5f, g->mScaleY * 0.5f);
 	}
