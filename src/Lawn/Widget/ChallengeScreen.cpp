@@ -139,6 +139,15 @@ ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 	mBackButton->mLabel = "Back to Menu";
 	mBackButton->Resize(151, 568, 111, 26);
 
+	mChallengesButton = MakeNewButton(ChallengeScreen::ChallengeScreen_Selector, this, "Page Selection", nullptr, Sexy::IMAGE_SEEDCHOOSER_BUTTON2,
+		Sexy::IMAGE_SEEDCHOOSER_BUTTON2_GLOW, Sexy::IMAGE_SEEDCHOOSER_BUTTON2_GLOW);
+	mChallengesButton->mTextDownOffsetX = 1;
+	mChallengesButton->mTextDownOffsetY = 1;
+	mChallengesButton->mColors[ButtonWidget::COLOR_LABEL] = Color(42, 42, 90);
+	mChallengesButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(42, 42, 90);
+	mChallengesButton->mLabel = "Page Selection";
+	mChallengesButton->Resize(806, 568, 111, 26);
+
 	for (int aPageIdx = CHALLENGE_PAGE_SURVIVAL; aPageIdx < MAX_CHALLANGE_PAGES; aPageIdx++)
 	{
 		ButtonWidget* aPageButton = new ButtonWidget(ChallengeScreen::ChallengeScreen_Page + aPageIdx, this);
@@ -214,6 +223,7 @@ ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 ChallengeScreen::~ChallengeScreen()
 {
 	delete mBackButton;
+	delete mChallengesButton;
 	for (ButtonWidget* aPageButton : mPageButton) delete aPageButton;
 	for (ButtonWidget* aChallengeButton : mChallengeButtons) delete aChallengeButton;
 	delete mToolTip;
@@ -634,6 +644,7 @@ void ChallengeScreen::AddedToManager(WidgetManager* theWidgetManager)
 {
 	Widget::AddedToManager(theWidgetManager);
 	AddWidget(mBackButton);
+	AddWidget(mChallengesButton);
 	for (ButtonWidget* aButton : mPageButton) AddWidget(aButton);
 	for (ButtonWidget* aButton : mChallengeButtons) AddWidget(aButton);
 }
@@ -642,6 +653,7 @@ void ChallengeScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
 	RemoveWidget(mBackButton);
+	RemoveWidget(mChallengesButton);
 	for (ButtonWidget* aButton : mPageButton) RemoveWidget(aButton);
 	for (ButtonWidget* aButton : mChallengeButtons) RemoveWidget(aButton);
 }
@@ -658,6 +670,10 @@ void ChallengeScreen::ButtonDepress(int theId)
 	{
 		mApp->KillChallengeScreen();
 		mApp->DoBackToMain();
+	}
+	else if (theId == ChallengeScreen::ChallengeScreen_Selector)
+	{
+		mApp->DoChallengePagesDialog();
 	}
 
 	int aChallengeMode = theId - ChallengeScreen::ChallengeScreen_Mode;

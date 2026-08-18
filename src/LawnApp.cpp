@@ -60,6 +60,7 @@
 #include "Lawn/Widget/ContinueDialog.h"
 #include "Lawn/System/ReanimationLawn.h"
 #include "Lawn/Widget/ChallengeScreen.h"
+#include "Lawn/Widget/ChallengePagesDialog.h"
 #include "Lawn/Widget/NewOptionsDialog.h"
 #include "Lawn/Widget/ZombatarTOS.h"
 #include "Lawn/Widget/SeedChooserScreen.h"
@@ -1094,6 +1095,20 @@ void LawnApp::FinishTimesUpDialog()
 {
 	KillDialog(Dialogs::DIALOG_TIMESUP);
 }
+
+void LawnApp::DoChallengePagesDialog()
+{
+	if (mChallengeScreen == nullptr)
+		return;
+
+	KillDialog(Dialogs::DIALOG_CHALLENGE_PAGES);
+
+	ChallengePagesDialog* aDialog = new ChallengePagesDialog(this);
+	CenterDialog(aDialog, aDialog->mWidth, aDialog->mHeight);
+	AddDialog(Dialogs::DIALOG_CHALLENGE_PAGES, aDialog);
+	mWidgetManager->SetFocus(aDialog);
+}
+
 
 void LawnApp::DoConfirmSellDialog(const std::string& theMessage)
 {

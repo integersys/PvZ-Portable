@@ -37,12 +37,14 @@ private:
 	enum
 	{
 		ChallengeScreen_Back = 100,
+		ChallengeScreen_Selector = 101,
 		ChallengeScreen_Mode = 200,
 		ChallengeScreen_Page = 300
 	};
 
 public:
 	NewLawnButton*              mBackButton;
+	NewLawnButton*              mChallengesButton;
 	ButtonWidget*               mPageButton[MAX_CHALLANGE_PAGES];
 	ButtonWidget*               mChallengeButtons[NUM_CHALLENGE_MODES];
 	LawnApp*                    mApp;
