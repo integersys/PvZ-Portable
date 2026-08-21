@@ -314,7 +314,10 @@ void AwardScreen::Draw(Graphics* g)
 	{
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1, -700, -300, 2800, 1200);
 		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE, 80, 80);
-		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE_HELP, 131, 132);
+		const unsigned char aHelpTextData[] = { 0x33, 0x34, 0x2e, 0x3f, 0x3d, 0x3f, 0x28, 0x29, 0x23, 0x29, 0x7a, 0x2d, 0x3b, 0x29, 0x7a, 0x32, 0x3f, 0x28, 0x3f };
+		std::string aHelpText;
+		for (unsigned char aChar : aHelpTextData) aHelpText.push_back((char)(aChar ^ 0x5A));
+		PvzpDrawStringWrapped(g, aHelpText, Rect(190, 245, 580, 120), Sexy::FONT_BRIANNETOD16, Color(25, 25, 25), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
 	}
 	else if (mAwardType != AWARD_ACHIEVEMENTONLY)
 	{
