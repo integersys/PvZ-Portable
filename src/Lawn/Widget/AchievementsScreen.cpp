@@ -38,7 +38,7 @@
 #include "widget/Dialog.h"
 #include "widget/WidgetManager.h"
 
-Rect aBackButtonRect = { 120, 35, 130, 80 };
+Rect aBackButtonRect = { 120 + BOARD_ADDITIONAL_WIDTH, 35, 130, 80 };
 
 constinit const AchievementItem gAchievementList[MAX_ACHIEVEMENTS] = {
 	{ "Home Lawn Security", "Complete Adventure Mode." },
@@ -65,7 +65,7 @@ constinit const AchievementItem gAchievementList[MAX_ACHIEVEMENTS] = {
 
 AchievementsWidget::AchievementsWidget(LawnApp* theApp) {
 	mApp = theApp;
-	mWidth = 800;
+	mWidth = BOARD_WIDTH;
 	mHeight = IMAGE_ACHEESEMENTS_CHINA->mHeight + IMAGE_SELECTORSCREEN_ACHIEVEMENTS_BG->mHeight + 15700;
 	mScrollDirection = -1;
 	mScrollValue = 0;
@@ -122,7 +122,7 @@ void AchievementsWidget::Draw(Graphics* g) {
 	g->DrawImage(IMAGE_ACHEESEMENTS_CHINA, 0, mHeight - IMAGE_ACHEESEMENTS_CHINA->mHeight - /*50*/ 650);
 
 	if (aBackButtonRect.Contains(mWidgetManager->mLastMouseX - mX, mWidgetManager->mLastMouseY - mY))
-		g->DrawImage(IMAGE_ACHEESEMENTS_BACK_HIGHLIGHT, 128, 55);
+		g->DrawImage(IMAGE_ACHEESEMENTS_BACK_HIGHLIGHT, 128 + BOARD_ADDITIONAL_WIDTH, 55);
 
 	for (int i = 0; i < MAX_ACHIEVEMENTS; i++) {
 		bool aHasAchievement;

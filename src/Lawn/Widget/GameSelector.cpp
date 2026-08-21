@@ -39,6 +39,7 @@
 #include "../../PvzpLib/PvzpFoley.h"
 #include "../../PvzpLib/PvzpDebug.h"
 #include "graphics/Font.h"
+#include "misc/ResourceManager.h"
 #include "../../PvzpLib/Reanimator.h"
 #include "../../PvzpLib/PvzpParticle.h"
 #include "widget/Dialog.h"
@@ -168,18 +169,21 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mZombatarButton->mBtnNoDraw = true;
 	mZombatarButton->mMouseVisible = false;
 
+	Sexy::Image* aAchievementButtonImage = mApp->mResourceManager->GetImageThrow("IMAGE_ACHIEVEMENT_BUTTON");
+	Sexy::Image* aAchievementHighlightImage = mApp->mResourceManager->GetImageThrow("IMAGE_ACHIEVEMENT_HIGHLIGHT");
+
 	mAchievementsButton = MakeNewButton(
 		GameSelector::GameSelector_Achievements,
 		this,
 		"",
 		nullptr,
-		Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL,
-		Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL_PRESS,
-		Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL_PRESS
+		aAchievementButtonImage,
+		aAchievementHighlightImage,
+		aAchievementHighlightImage
 	);
-	mAchievementsButton->Resize(20, mApp->mHeight - Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL->mHeight - 35, Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL->mWidth, Sexy::IMAGE_SELECTORSCREEN_ACHIEVEMENTS_PEDESTAL->mHeight);
+	mAchievementsButton->Resize(20, mApp->mHeight - aAchievementButtonImage->mHeight - 35, aAchievementButtonImage->mWidth, aAchievementButtonImage->mHeight);
 	mAchievementsButton->mClip = false;
-	mAchievementsButton->mBtnNoDraw = mHasTrophy;
+	mAchievementsButton->mBtnNoDraw = false;
 	mAchievementsButton->mMouseVisible = false;
 
 	mZenGardenButton = MakeNewButton(
@@ -353,7 +357,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mAchievementsWidget->Move(0, mApp->mHeight);
 
 	// Add as children in z-order (bottom to top).
-	AddWidget(mAchievementsButton);
+
 	AddWidget(mZombatarButton);
 	AddWidget(mChangeUserButton);
 	AddWidget(mSurvivalButton);
@@ -366,6 +370,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 	AddWidget(mHelpButton);
 	AddWidget(mStoreButton);
 	AddWidget(mAlmanacButton);
+	AddWidget(mAchievementsButton);
 	AddWidget(mOverlayWidget);
 
 	PvzpHesitationTrace("gameselectorinit");
@@ -483,7 +488,7 @@ void GameSelector::SyncButtons()
 void GameSelector::AddTrophySparkle()
 {
 	PVZP_ASSERT(mTrophyParticleID == PARTICLESYSTEMID_NULL);
-	PvzpParticleSystem* aTrophyParticle = mApp->AddPvzpParticle(85.0f, 330.0f, RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_TROPHY_SPARKLE);
+	PvzpParticleSystem* aTrophyParticle = mApp->AddPvzpParticle(85.0f + BOARD_ADDITIONAL_WIDTH, 380.0f + BOARD_OFFSET_Y, RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_TROPHY_SPARKLE);
 	mTrophyParticleID = mApp->ParticleGetID(aTrophyParticle);
 }
 
@@ -701,9 +706,9 @@ void GameSelector::DrawOverlay(Graphics* g)
 	if (mHasTrophy)
 	{
 		if (mApp->EarnedGoldTrophy())
-			PvzpDrawImageCelF(g, Sexy::IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 12.f, aTransformLeft.mTransY + 345.f, 1, 0);
+			PvzpDrawImageCelF(g, Sexy::IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 10.0f + BOARD_ADDITIONAL_WIDTH + 370, aTransformLeft.mTransY + 350.0f + BOARD_OFFSET_Y + 60, 1, 0);
 		else
-			PvzpDrawImageCelF(g, Sexy::IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 12.f, aTransformLeft.mTransY + 345.f, 0, 0);
+			PvzpDrawImageCelF(g, Sexy::IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 10.0f + BOARD_ADDITIONAL_WIDTH + 370, aTransformLeft.mTransY + 350.0f + BOARD_OFFSET_Y + 60, 0, 0);
 
 		PvzpParticleSystem* aTrophyParticle = mApp->ParticleTryToGet(mTrophyParticleID);
 		if (aTrophyParticle)
@@ -722,20 +727,20 @@ void GameSelector::UpdateTooltip()
 	{
 		int aMouseX = mApp->mWidgetManager->mLastMouseX;
 		int aMouseY = mApp->mWidgetManager->mLastMouseY;
-		if (aMouseX >= 50 && aMouseX < 135 && aMouseY >= 275 && aMouseY < 500)
+		if (aMouseX >= 50 + BOARD_ADDITIONAL_WIDTH && aMouseX < 135 + BOARD_ADDITIONAL_WIDTH && aMouseY >= 325 + BOARD_OFFSET_Y && aMouseY < 467 + BOARD_OFFSET_Y)
 		{
 			if (mApp->EarnedGoldTrophy())
 			{
 				mToolTip->SetLabel(LawnApp::Pluralize(mApp->mPlayerInfo->mFinishedAdventure, "[GOLD_SUNFLOWER_TOOLTIP]", "[GOLD_SUNFLOWER_TOOLTIP_PLURAL]"));
-				mToolTip->mX = 32;
-				mToolTip->mY = 510;
+				mToolTip->mX = 32 + BOARD_ADDITIONAL_WIDTH;
+				mToolTip->mY = 510 + BOARD_OFFSET_Y;
 				mToolTip->mVisible = true;
 			}
 			else
 			{
 				mToolTip->SetLabel("[SILVER_SUNFLOWER_TOOLTIP]");
-				mToolTip->mX = 20;
-				mToolTip->mY = 495;
+				mToolTip->mX = 20 + BOARD_ADDITIONAL_WIDTH;
+				mToolTip->mY = 495 + BOARD_OFFSET_Y;
 				mToolTip->mVisible = true;
 			}
 
@@ -943,8 +948,8 @@ void GameSelector::Update()
 	TrackButton(mStoreButton, "SelectorScreen_BG_Right", 334.0f + BOARD_ADDITIONAL_WIDTH + 111.0f, 441.0f + BOARD_OFFSET_Y + 80.0f);
 	TrackButton(mChangeUserButton, "woodsign2", 24.0f + BOARD_ADDITIONAL_WIDTH, 10.0f + BOARD_OFFSET_Y);
 	TrackButton(mZombatarButton, "woodsign3", BOARD_ADDITIONAL_WIDTH, BOARD_OFFSET_Y);
-	TrackButton(mAchievementsButton, "SelectorScreen_BG_Left", 20.f, 480.f);
-	aSelectorReanim->SetImageOverride("woodsign2", (mChangeUserButton->mIsOver || mChangeUserButton->mIsDown) ? Sexy::IMAGE_REANIM_SELECTORSCREEN_WOODSIGN2_PRESS : nullptr);
+	TrackButton(mAchievementsButton, "SelectorScreen_BG_Left", 390.f + BOARD_ADDITIONAL_WIDTH, 540.f + BOARD_OFFSET_Y);
+		aSelectorReanim->SetImageOverride("woodsign2", (mChangeUserButton->mIsOver || mChangeUserButton->mIsDown) ? Sexy::IMAGE_REANIM_SELECTORSCREEN_WOODSIGN2_PRESS : nullptr);
 	aSelectorReanim->SetImageOverride("woodsign3", (mZombatarButton->mIsOver || mZombatarButton->mIsDown) ? Sexy::IMAGE_REANIM_SELECTORSCREEN_WOODSIGN3_PRESS : nullptr);
 }
 
