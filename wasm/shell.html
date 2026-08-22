@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PvZ Portable — Web</title>
+<title>PvZ Sewer-Cyn — Web</title>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-    background: #1a1a2e; color: #eee;
+    background: #160b26; color: #eee;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
 }
@@ -25,27 +25,27 @@ body.game-mode {
     min-height: 100vh; margin: 0 auto;
     display: flex; flex-direction: column; justify-content: center;
 }
-#upload-screen h1 { font-size: 1.8em; margin-bottom: 0.35em; color: #4ecca3; }
+#upload-screen h1 { font-size: 1.8em; margin-bottom: 0.35em; color: #c084fc; }
 #upload-screen h1 a { color: inherit; text-decoration: none; }
 #upload-screen h1 a:hover { text-decoration: underline; }
 #project-links {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9em;
     font-size: 0.9em; margin-bottom: 0.75em;
 }
-#project-links a { color: #4ecca3; text-decoration: underline; }
+#project-links a { color: #c084fc; text-decoration: underline; }
 #upload-screen p  { margin: 0.5em 0; line-height: 1.5; color: #bbb; }
 #upload-screen .note { font-size: 0.85em; color: #888; margin-top: 1em; }
 #drop-zone {
-    border: 2px dashed #4ecca3; border-radius: 12px;
+    border: 2px dashed #c084fc; border-radius: 12px;
     padding: 2em; margin: 1.5em 0;
     transition: background 0.3s, border-color 0.3s, transform 0.2s;
 }
-#drop-zone:hover, #drop-zone.dragover { background: rgba(78,204,163,0.1); }
+#drop-zone:hover, #drop-zone.dragover { background: rgba(192,132,252,0.1); }
 #drop-zone.ready {
-    border-style: solid; border-color: #4ecca3;
-    background: rgba(78,204,163,0.08); cursor: pointer;
+    border-style: solid; border-color: #c084fc;
+    background: rgba(192,132,252,0.08); cursor: pointer;
 }
-#drop-zone.ready:hover { background: rgba(78,204,163,0.18); transform: translateY(-1px); }
+#drop-zone.ready:hover { background: rgba(192,132,252,0.18); transform: translateY(-1px); }
 #drop-zone input { display: none; }
 /* Upload-mode elements (hidden when .ready or .loading) */
 #drop-zone-title { margin: 0 0 0.4em; color: #eee; }
@@ -58,7 +58,7 @@ body.game-mode {
 #drop-zone.loading #resource-split-actions { display: none; }
 /* Ready-mode elements (shown only when .ready) */
 #drop-zone-ready-title {
-    display: none; font-size: 1.35em; font-weight: bold; color: #4ecca3;
+    display: none; font-size: 1.35em; font-weight: bold; color: #c084fc;
     margin: 0.3em 0;
 }
 #drop-zone-ready-subtitle {
@@ -68,7 +68,7 @@ body.game-mode {
     display: none; font-size: 0.8em; color: #888; margin-top: 0.5em;
 }
 #drop-zone-reselect a {
-    color: #4ecca3; cursor: pointer; text-decoration: underline;
+    color: #c084fc; cursor: pointer; text-decoration: underline;
 }
 #drop-zone.ready #drop-zone-ready-title,
 #drop-zone.ready #drop-zone-ready-subtitle,
@@ -85,16 +85,16 @@ body.game-mode {
     display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em;
 }
 .resource-action {
-    appearance: none; background: rgba(43,43,64,0.85); color: #eee;
-    border: 1px solid rgba(78,204,163,0.55); border-radius: 10px;
+    appearance: none; background: rgba(38,22,54,0.85); color: #eee;
+    border: 1px solid rgba(192,132,252,0.55); border-radius: 10px;
     padding: 1.15em 1em; cursor: pointer; text-align: center;
     transition: transform 0.18s, background 0.18s, border-color 0.18s;
 }
 .resource-action:hover {
-    background: rgba(78,204,163,0.12); border-color: #4ecca3; transform: translateY(-1px);
+    background: rgba(192,132,252,0.12); border-color: #c084fc; transform: translateY(-1px);
 }
 .resource-action strong {
-    display: block; font-size: 1.02em; color: #4ecca3; margin-bottom: 0.35em;
+    display: block; font-size: 1.02em; color: #c084fc; margin-bottom: 0.35em;
 }
 .resource-action span {
     display: block; font-size: 0.85em; line-height: 1.4; color: #bbb;
@@ -102,19 +102,19 @@ body.game-mode {
 #file-list { text-align: center; margin: 0.5em 0 0; font-size: 0.85em; display: none; }
 #file-list.has-items { display: block; }
 #file-list div { padding: 2px 0; color: #aaa; display: inline-block; margin: 0 0.5em; }
-#file-list div.ok { color: #4ecca3; }
+#file-list div.ok { color: #c084fc; }
 #file-list div.missing { color: #e74c3c; }
-#loading-drop-zone { display: none; margin-top: 0.6em; color: #4ecca3; font-size: 0.9em; }
+#loading-drop-zone { display: none; margin-top: 0.6em; color: #c084fc; font-size: 0.9em; }
 #loading-drop-zone.has-error { display: block; color: #e74c3c; }
 #upload-save-actions {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6em;
     margin-top: 0.75em;
 }
 #upload-save-actions button {
-    background: #2b2b40; color: #4ecca3; border: 1px solid #4ecca3;
+    background: #261636; color: #c084fc; border: 1px solid #c084fc;
     border-radius: 8px; padding: 0.6em 1em; cursor: pointer;
 }
-#upload-save-actions button:hover { background: rgba(78,204,163,0.12); }
+#upload-save-actions button:hover { background: rgba(192,132,252,0.12); }
 #upload-save-actions button:disabled { opacity: 0.4; cursor: default; }
 #canvas-container { display: none; width: 100vw; height: 100vh; position: fixed; inset: 0;
     justify-content: center; align-items: center; background: #000; overflow: hidden; }
@@ -143,11 +143,11 @@ canvas#canvas {
     flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 16px);
 }
 #save-toolbar button {
-    background: rgba(30,30,50,0.75); color: #4ecca3; border: 1px solid #4ecca3;
+    background: rgba(30,14,46,0.75); color: #c084fc; border: 1px solid #c084fc;
     border-radius: 6px; padding: 0.35em 0.8em; font-size: 0.85em; cursor: pointer;
     backdrop-filter: blur(4px); transition: background 0.2s;
 }
-#save-toolbar button:hover { background: rgba(78,204,163,0.2); }
+#save-toolbar button:hover { background: rgba(192,132,252,0.2); }
 #save-toolbar button:disabled { opacity: 0.4; cursor: default; }
 
 @media (max-height: 760px), (max-width: 640px) {
@@ -160,32 +160,32 @@ canvas#canvas {
 </head>
 <body class="upload-mode">
 <div id="upload-screen">
-    <h1><a href="https://github.com/wszqkzqk/PvZ-Portable" target="_blank" rel="noopener noreferrer">PvZ Portable | Play Anywhere</a></h1>
+    <h1><a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer">PvZ Sewer-Cyn | Play Anywhere</a></h1>
     <p id="project-links">
-        <a href="https://github.com/wszqkzqk/PvZ-Portable" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://github.com/wszqkzqk/PvZ-Portable/issues" target="_blank" rel="noopener noreferrer">Issues</a>
-        <a href="https://github.com/wszqkzqk/PvZ-Portable/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+        <a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/integersys/PvZ-Portable/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+        <a href="https://github.com/integersys/PvZ-Portable/releases" target="_blank" rel="noopener noreferrer">Releases</a>
     </p>
-    <p>Community-driven re-implementation for <strong>all desktop, mobile, and web</strong>. Play instantly in your browser with no installation. <strong>No game resources are included.</strong></p>
-    <p>To use this engine, you <strong>MUST</strong> legally purchase the original game on <a href="https://store.steampowered.com/app/3590/Plants_vs_Zombies_GOTY_Edition/" target="_blank" style="color:#4ecca3;text-decoration:underline;">Steam</a> or <a href="https://www.ea.com/games/plants-vs-zombies/plants-vs-zombies" target="_blank" style="color:#4ecca3;text-decoration:underline;">EA's official website</a>.<br>
-    Please provide your own <code>main.pak</code> and <code>properties/</code> folder from your legally purchased copy of Plants&nbsp;vs.&nbsp;Zombies GOTY Edition.</p>
-    <p style="font-size: 0.85em; color: #888; font-style: italic; line-height: 1.4; max-width: 600px; margin: 0 auto 1.5em auto;">Disclaimer: This strictly educational project is a community-driven engine re-implementation. It is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts.</p>
+    <p>Browser port of <strong>PvZ Sewer-Cyn Edition</strong>, built on the PvZ-Portable engine. Play the Sewer-Cyn version directly in your browser with no installation. <strong>No Sewer-Cyn game resources are included.</strong></p>
+    <p>To use this web build, you <strong>MUST</strong> provide the files from a <strong>legal Sewer-Cyn PvZ game copy</strong>.<br>
+    Select the original <code>PvZ Sewer-Cyn Edition</code> game folder or a ZIP of that folder. The original Sewer-Cyn release uses loose resources, so <code>main.pak</code> is not required.</p>
+    <p style="font-size: 0.85em; color: #888; font-style: italic; line-height: 1.4; max-width: 600px; margin: 0 auto 1.5em auto;">Disclaimer: This is a community-driven web port of the Sewer-Cyn build. It is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts. Sewer-Cyn resources are not distributed by this website.</p>
 
     <div id="drop-zone">
-        <p id="drop-zone-title">📂 Drop resources here — import and play instantly!</p>
-        <p id="drop-zone-subtitle">Drop a ZIP or folder containing <code>main.pak</code> &amp; <code>properties/</code>, or pick one below:</p>
+        <p id="drop-zone-title">📂 Drop your PvZ Sewer-Cyn Edition resources here</p>
+        <p id="drop-zone-subtitle">Drop the original <code>PvZ Sewer-Cyn Edition</code> ZIP or game folder, or pick one below:</p>
         <div id="resource-split-actions">
             <button id="browse-zip-btn" class="resource-action" type="button">
-                <strong>Import Resource ZIP</strong>
-                <span>Select a ZIP package that contains <code>main.pak</code> and <code>properties/</code>.</span>
+                <strong>Import Sewer-Cyn ZIP</strong>
+                <span>Select the original Sewer-Cyn release ZIP or a ZIP of the complete game folder.</span>
             </button>
             <button id="browse-folder-btn" class="resource-action" type="button">
-                <strong>Select Resource Folder</strong>
-                <span>Select a folder that directly contains <code>main.pak</code> and <code>properties/</code>.</span>
+                <strong>Select Sewer-Cyn Folder</strong>
+                <span>Select the complete PvZ Sewer-Cyn Edition game folder containing the loose resources.</span>
             </button>
         </div>
         <p id="drop-zone-ready-title">▶ Start Game</p>
-        <p id="drop-zone-ready-subtitle">Resources loaded successfully. Click here to launch!</p>
+        <p id="drop-zone-ready-subtitle">Sewer-Cyn resources verified. Click here to launch!</p>
         <div id="file-list"></div>
         <p id="drop-zone-reselect"><a id="reselect-link">Re-select resources</a></p>
         <div id="loading-drop-zone"></div>
@@ -200,16 +200,16 @@ canvas#canvas {
     <input type="file" id="upload-save-import-input" accept=".zip" style="display:none">
     <input type="file" id="upload-save-import-dir-input" multiple webkitdirectory style="display:none">
 
-    <p class="note">Your files stay in your browser and are never uploaded to any server.<br>Resources can be loaded from a ZIP package or a resource folder. Saves are stored locally in your browser via IndexedDB and can be imported from ZIP or folder.</p>
+    <p class="note">Your files stay in your browser and are never uploaded to any server.<br>Sewer-Cyn resources are loaded directly from the original loose-resource ZIP or game folder. Windows executables, DLLs, source files, caches, and bundled userdata are ignored. Saves are stored locally in your browser via IndexedDB and can be imported separately.</p>
     <p class="note">Starting the game indicates that you have read the notices above and acknowledge the no-warranty terms of the LGPL v3.0-or-later license for this code.</p>
-    <p class="note">Copyright (C) 2026 Zhou Qiankang &lt;<a href="mailto:wszqkzqk@qq.com" style="color:#4ecca3;text-decoration:underline;">wszqkzqk@qq.com</a>&gt;</p>
+    <p class="note">Sewer-Cyn web fork: <a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer" style="color:#c084fc;text-decoration:underline;">integersys/PvZ-Portable</a>. Based on PvZ-Portable by Zhou Qiankang and contributors.</p>
 </div>
 
 <div id="canvas-container">
     <div id="save-toolbar">
         <button id="save-export-btn" title="Export saves as ZIP">💾 Export Saves</button>
     </div>
-    <canvas id="canvas" width="800" height="600" tabindex="0"></canvas>
+    <canvas id="canvas" width="1066" height="600" tabindex="0"></canvas>
 </div>
 <textarea id="pvz-soft-keyboard" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea>
 
@@ -242,8 +242,6 @@ Module.canvas.addEventListener('contextmenu', function(e) {
 'use strict';
 
 const collectedFiles = new Map();
-let hasPak = false;
-let hasProperties = false;
 let savesMounted = false;
 let gameStarted = false;
 let saveSyncIntervalId = null;
@@ -304,13 +302,31 @@ resourceZipInput.addEventListener('change', async () => {
     refreshUI();
 });
 
+const SEWERCYN_RESOURCE_ROOTS = new Set([
+    'compiled',
+    'data',
+    'images',
+    'languages',
+    'music',
+    'particles',
+    'properties',
+    'reanim',
+    'resourcepacks',
+    'sounds'
+]);
+
 function normalizeResourcePath(path) {
     const cleanPath = path.replace(/\\/g, '/').replace(/^\/+/, '');
     const parts = cleanPath.split('/').filter(Boolean);
     if (parts.length === 0) return '';
-    if (parts[0] === 'main.pak' || parts[0] === 'properties') return parts.join('/');
-    if (parts.length > 1) return parts.slice(1).join('/');
-    return parts[0];
+    const sewerRootIndex = parts.findIndex(part => part.toLowerCase() === 'pvz sewer-cyn edition');
+    if (sewerRootIndex >= 0) {
+        const resourceParts = parts.slice(sewerRootIndex + 1);
+        if (resourceParts.length === 0 || !SEWERCYN_RESOURCE_ROOTS.has(resourceParts[0].toLowerCase())) return '';
+        return resourceParts.join('/');
+    }
+    if (!SEWERCYN_RESOURCE_ROOTS.has(parts[0].toLowerCase())) return '';
+    return parts.join('/');
 }
 
 function normalizeSaveImportPath(path) {
@@ -374,13 +390,22 @@ async function importResourceZip(file, btn) {
 }
 
 function refreshUI() {
-    hasPak = collectedFiles.has('main.pak');
-    hasProperties = false;
-    for (const key of collectedFiles.keys()) {
-        if (key.startsWith('properties/')) { hasProperties = true; break; }
-    }
+    const lowerKeys = Array.from(collectedFiles.keys(), key => key.toLowerCase());
+    const keySet = new Set(lowerKeys);
+    const checks = [
+        ['properties/resources.xml', keySet.has('properties/resources.xml')],
+        ['images/packet_plants.png', keySet.has('images/packet_plants.png')],
+        ['images/Sunflower_trophy.png', keySet.has('images/sunflower_trophy.png')],
+        ['reanim/SelectorScreen_BG_Left.png', keySet.has('reanim/selectorscreen_bg_left.png')],
+        ['compiled/', lowerKeys.some(key => key.startsWith('compiled/'))],
+        ['data/', lowerKeys.some(key => key.startsWith('data/'))],
+        ['languages/english.lang', keySet.has('languages/english.lang')],
+        ['music/', lowerKeys.some(key => key.startsWith('music/'))],
+        ['particles/', lowerKeys.some(key => key.startsWith('particles/'))],
+        ['sounds/', lowerKeys.some(key => key.startsWith('sounds/'))]
+    ];
 
-    const allReady = hasPak && hasProperties;
+    const allReady = checks.every(([, ok]) => ok);
     const hasAny = collectedFiles.size > 0;
 
     fileListDiv.innerHTML = '';
@@ -391,8 +416,7 @@ function refreshUI() {
             d.className = ok ? 'ok' : 'missing';
             fileListDiv.appendChild(d);
         };
-        show('main.pak', hasPak);
-        show('properties/', hasProperties);
+        for (const [label, ok] of checks) show(label, ok);
     }
     fileListDiv.classList.toggle('has-items', hasAny);
 
@@ -400,7 +424,7 @@ function refreshUI() {
     if (allReady) {
         dropZone.setAttribute('tabindex', '0');
         dropZone.setAttribute('role', 'button');
-        dropZone.setAttribute('aria-label', 'Start Game');
+        dropZone.setAttribute('aria-label', 'Start PvZ Sewer-Cyn');
     } else {
         dropZone.removeAttribute('tabindex');
         dropZone.removeAttribute('role');
@@ -408,7 +432,6 @@ function refreshUI() {
     }
 }
 
-// Click or keyboard activate the drop zone when ready → start game
 function handleDropZoneActivate(e) {
     if (!dropZone.classList.contains('ready')) return;
     if (e.target.closest('#drop-zone-reselect') || e.target.closest('#file-list')) return;
@@ -594,7 +617,7 @@ async function exportSaves() {
         const blob = await zip.generateAsync({ type: 'blob' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'pvz-portable-savedata.zip';
+        a.download = 'pvz-sewer-cyn-savedata.zip';
         a.click();
         URL.revokeObjectURL(a.href);
     } catch (e) {
