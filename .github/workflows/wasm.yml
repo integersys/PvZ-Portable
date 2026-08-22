@@ -1,0 +1,35 @@
+name: Website build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - web-test
+
+jobs:
+  build-wasm:
+    name: Build website
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Emscripten
+        uses: emscripten-core/setup-emsdk@v16
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Build WebAssembly
+        run: bash wasm/build-wasm.sh --deps
+
+      - name: Upload website build
+        uses: actions/upload-artifact@v7
+        with:
+          name: sewer-cyn-wasm
+          path: |
+            build-wasm/pvz-portable.html
+            build-wasm/pvz-portable.js
+            build-wasm/pvz-portable.wasm
