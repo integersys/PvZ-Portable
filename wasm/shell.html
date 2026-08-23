@@ -82,7 +82,7 @@ body.game-mode {
 #drop-zone.loading #drop-zone-reselect,
 #drop-zone.loading #file-list { display: none; }
 #resource-split-actions {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em;
+    display: grid; grid-template-columns: 1fr; gap: 0.9em;
 }
 .resource-action {
     appearance: none; background: rgba(38,22,54,0.85); color: #eee;
@@ -163,25 +163,19 @@ canvas#canvas {
     <h1><a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer">PvZ Sewer-Cyn | Play Anywhere</a></h1>
     <p id="project-links">
         <a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://github.com/integersys/PvZ-Portable/issues" target="_blank" rel="noopener noreferrer">Issues</a>
         <a href="https://github.com/integersys/PvZ-Portable/releases" target="_blank" rel="noopener noreferrer">Releases</a>
     </p>
-    <p>Browser port of <strong>PvZ Sewer-Cyn Edition</strong>, built on the PvZ-Portable engine. Play the Sewer-Cyn version directly in your browser with no installation. <strong>No Sewer-Cyn game resources are included.</strong></p>
-    <p>To use this web build, you <strong>MUST</strong> provide the files from a <strong>legal Sewer-Cyn PvZ game copy</strong>.<br>
-    Select the original <code>PvZ Sewer-Cyn Edition</code> game folder or a ZIP of that folder. The original Sewer-Cyn release uses loose resources, so <code>main.pak</code> is not required.</p>
-    <p style="font-size: 0.85em; color: #888; font-style: italic; line-height: 1.4; max-width: 600px; margin: 0 auto 1.5em auto;">Disclaimer: This is a community-driven web port of the Sewer-Cyn build. It is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts. Sewer-Cyn resources are not distributed by this website.</p>
+    <p>Browser port of <strong>PvZ Sewer-Cyn Edition</strong>, built on the PvZ-Portable engine. Play the Sewer-Cyn version directly in your browser with no installation. <strong>No PvZ GOTY game files are included.</strong></p>
+    <p>To use this web build, you <strong>MUST</strong> provide the files from a <strong>legal Sewer-Cyn PvZ game copy</strong>.</p>
+    <p style="font-size: 0.85em; color: #888; font-style: italic; line-height: 1.4; max-width: 600px; margin: 0 auto 1.5em auto;">Disclaimer: This is a community-driven web port of the Sewer-Cyn build. It is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts. Sewer-Cyn resources AND original PvZ GOTY game files are not distributed by this website. You must legally acquire these resources yourself.</p>
 
     <div id="drop-zone">
         <p id="drop-zone-title">📂 Drop your PvZ Sewer-Cyn Edition resources here</p>
-        <p id="drop-zone-subtitle">Drop the original <code>PvZ Sewer-Cyn Edition</code> ZIP or game folder, or pick one below:</p>
+        <p id="drop-zone-subtitle">Drag and drop the <code>PvZ Sewer-Cyn Edition</code> ZIP, or click the Import button below:</p>
         <div id="resource-split-actions">
             <button id="browse-zip-btn" class="resource-action" type="button">
                 <strong>Import Sewer-Cyn ZIP</strong>
-                <span>Select the original Sewer-Cyn release ZIP or a ZIP of the complete game folder.</span>
-            </button>
-            <button id="browse-folder-btn" class="resource-action" type="button">
-                <strong>Select Sewer-Cyn Folder</strong>
-                <span>Select the complete PvZ Sewer-Cyn Edition game folder containing the loose resources.</span>
+                <span>Select the original PvZ Sewer-Cyn Edition ZIP.</span>
             </button>
         </div>
         <p id="drop-zone-ready-title">▶ Start Game</p>
@@ -189,7 +183,7 @@ canvas#canvas {
         <div id="file-list"></div>
         <p id="drop-zone-reselect"><a id="reselect-link">Re-select resources</a></p>
         <div id="loading-drop-zone"></div>
-        <input type="file" id="file-input" multiple webkitdirectory>
+
         <input type="file" id="resource-zip-input" accept=".zip,application/zip,application/x-zip-compressed" style="display:none">
     </div>
     <div id="upload-save-actions">
@@ -200,9 +194,9 @@ canvas#canvas {
     <input type="file" id="upload-save-import-input" accept=".zip" style="display:none">
     <input type="file" id="upload-save-import-dir-input" multiple webkitdirectory style="display:none">
 
-    <p class="note">Your files stay in your browser and are never uploaded to any server.<br>Sewer-Cyn resources are loaded directly from the original loose-resource ZIP or game folder. Windows executables, DLLs, source files, caches, and bundled userdata are ignored. Saves are stored locally in your browser via IndexedDB and can be imported separately.</p>
+    <p class="note">Your files stay in your browser and are never uploaded to any server.<br>Sewer-Cyn resources are loaded directly from the original PvZ Sewer-Cyn Edition ZIP. Windows executables, DLLs, source files, caches, and bundled userdata are ignored. Saves are stored locally in your browser via IndexedDB and can be imported separately.</p>
     <p class="note">Starting the game indicates that you have read the notices above and acknowledge the no-warranty terms of the LGPL v3.0-or-later license for this code.</p>
-    <p class="note">Sewer-Cyn web fork: <a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer" style="color:#c084fc;text-decoration:underline;">integersys/PvZ-Portable</a>. Based on PvZ-Portable by Zhou Qiankang and contributors.</p>
+    <p class="note">Sewer-Cyn fork: <a href="https://github.com/integersys/PvZ-Portable" target="_blank" rel="noopener noreferrer" style="color:#c084fc;text-decoration:underline;">integersys/PvZ-Portable</a>. Based on PvZ-Portable by Zhou Qiankang and contributors.</p>
 </div>
 
 <div id="canvas-container">
@@ -254,8 +248,6 @@ const SAVE_SYNC_INTERVAL_MS = 5000;
 const SAVE_CLOSE_WARNING_MS = 7000;
 
 const dropZone    = document.getElementById('drop-zone');
-const fileInput   = document.getElementById('file-input');
-const browseFolderBtn = document.getElementById('browse-folder-btn');
 const browseZipBtn = document.getElementById('browse-zip-btn');
 const resourceZipInput = document.getElementById('resource-zip-input');
 const fileListDiv = document.getElementById('file-list');
@@ -274,25 +266,15 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', async e => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
-    const items = e.dataTransfer.items;
-    if (!items) return;
-    const entries = [];
-    for (const item of items) {
-        const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
-        if (entry) entries.push(entry);
+    const files = Array.from(e.dataTransfer.files || []);
+    const file = files.find(f => f.name && f.name.toLowerCase().endsWith('.zip'));
+    if (!file) {
+        alert('Please drop the PvZ Sewer-Cyn Edition ZIP.');
+        return;
     }
-    for (const entry of entries) {
-        if (entry.isFile && entry.name && entry.name.toLowerCase().endsWith('.zip')) {
-            const file = await new Promise(r => entry.file(r));
-            await importResourceZip(file, browseZipBtn);
-            continue;
-        }
-        await traverseEntry(entry, '');
-    }
+    await importResourceZip(file, browseZipBtn);
     refreshUI();
 });
-browseFolderBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', () => { handleFileList(fileInput.files); refreshUI(); });
 browseZipBtn.addEventListener('click', () => resourceZipInput.click());
 resourceZipInput.addEventListener('change', async () => {
     const file = resourceZipInput.files && resourceZipInput.files[0];
@@ -340,32 +322,6 @@ function normalizeSaveImportPath(path) {
     return parts[0];
 }
 
-async function traverseEntry(entry, basePath) {
-    if (entry.isFile) {
-        const file = await new Promise(r => entry.file(r));
-        const rawPath = basePath ? basePath + '/' + entry.name : entry.name;
-        const path = normalizeResourcePath(rawPath);
-        if (!path) return;
-        collectedFiles.set(path, file);
-    } else if (entry.isDirectory) {
-        const dirPath = basePath ? basePath + '/' + entry.name : entry.name;
-        const reader = entry.createReader();
-        let batch;
-        do {
-            batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
-            for (const child of batch) await traverseEntry(child, dirPath);
-        } while (batch.length > 0);
-    }
-}
-
-function handleFileList(files) {
-    for (const f of files) {
-        const path = normalizeResourcePath(f.webkitRelativePath || f.name);
-        if (!path) continue;
-        collectedFiles.set(path, f);
-    }
-}
-
 async function importResourceZip(file, btn) {
     btn.disabled = true;
     const oldHTML = btn.innerHTML;
@@ -379,6 +335,16 @@ async function importResourceZip(file, btn) {
             if (!destPath) continue;
             const data = await zip.files[name].async('uint8array');
             collectedFiles.set(destPath, new File([data], destPath.split('/').pop()));
+        }
+
+        const aliases = [
+            ['compiled/reanim/TwinSunFlower.reanim.compiled', 'compiled/reanim/TwinSunflower.reanim.compiled'],
+            ['compiled/reanim/Iceshroom.reanim.compiled', 'compiled/reanim/IceShroom.reanim.compiled']
+        ];
+        for (const [sourcePath, aliasPath] of aliases) {
+            if (collectedFiles.has(sourcePath) && !collectedFiles.has(aliasPath)) {
+                collectedFiles.set(aliasPath, collectedFiles.get(sourcePath));
+            }
         }
     } catch (e) {
         console.error('Resource ZIP import failed:', e);
@@ -446,7 +412,6 @@ dropZone.addEventListener('keydown', e => {
 reselectLink.addEventListener('click', e => {
     e.stopPropagation();
     collectedFiles.clear();
-    fileInput.value = '';
     resourceZipInput.value = '';
     refreshUI();
 });
@@ -637,6 +602,9 @@ async function importSaves(file, btn) {
     try {
         const zip = await JSZip.loadAsync(file);
         const entries = Object.keys(zip.files).filter(n => !zip.files[n].dir);
+        if (entries.length === 0) throw new Error('No save files were found in the ZIP.');
+
+        let latestModified = 0;
 
         for (const name of entries) {
             let destPath = name;
@@ -650,11 +618,25 @@ async function importSaves(file, btn) {
                 try { Module.FS.mkdir(dir); } catch (e) {}
             }
 
-            const data = await zip.files[name].async('uint8array');
+            const entry = zip.files[name];
+            const data = await entry.async('uint8array');
             Module.FS.writeFile(fullPath, data);
+
+            const entryModified = entry.date instanceof Date ? entry.date.getTime() : 0;
+            if (entryModified > 0) {
+                latestModified = Math.max(latestModified, entryModified);
+                try { Module.FS.utime(fullPath, entry.date, entry.date); } catch (e) {}
+            }
         }
 
         await syncSaves();
+
+        if (!latestModified && file.lastModified) latestModified = file.lastModified;
+        const saveModified = latestModified
+            ? new Date(latestModified).toLocaleString()
+            : 'Unknown';
+
+        alert('Save game successfully loaded.\nLast modified (metadata): ' + saveModified);
     } catch (e) {
         console.error('Import failed:', e);
         alert('Import failed: ' + e.message);
@@ -670,6 +652,9 @@ async function importSaveDirectory(files, btn) {
     const oldText = btn.textContent;
     btn.textContent = '⏳ Importing…';
     try {
+        let importedCount = 0;
+        let latestModified = 0;
+
         for (const file of files) {
             const relativePath = normalizeSaveImportPath(file.webkitRelativePath || file.name);
             if (!relativePath) continue;
@@ -684,9 +669,24 @@ async function importSaveDirectory(files, btn) {
 
             const data = new Uint8Array(await file.arrayBuffer());
             Module.FS.writeFile(fullPath, data);
+            importedCount++;
+
+            if (file.lastModified) {
+                latestModified = Math.max(latestModified, file.lastModified);
+                const modifiedDate = new Date(file.lastModified);
+                try { Module.FS.utime(fullPath, modifiedDate, modifiedDate); } catch (e) {}
+            }
         }
 
+        if (importedCount === 0) throw new Error('No save files were found in the selected folder.');
+
         await syncSaves();
+
+        const saveModified = latestModified
+            ? new Date(latestModified).toLocaleString()
+            : 'Unknown';
+
+        alert('Save game successfully loaded.\nLast modified (metadata): ' + saveModified);
     } catch (e) {
         console.error('Save folder import failed:', e);
         alert('Save folder import failed: ' + e.message);
@@ -794,7 +794,6 @@ window.onGameExit = function() {
     dropZone.style.pointerEvents = '';
     loadStatus.style.display = 'none';
     collectedFiles.clear();
-    fileInput.value = '';
     resourceZipInput.value = '';
     refreshUI();
 
