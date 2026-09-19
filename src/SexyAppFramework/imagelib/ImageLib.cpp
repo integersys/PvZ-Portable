@@ -1315,22 +1315,14 @@ Image* ImageLib::GetImage(const std::string& theFilename, bool lookForAlphaImage
 	Image* anAlphaImage = nullptr;
 	if (lookForAlphaImage)
 	{
-		const std::string alphaPath0 = aFilename + "_";
-		if (FastFileExists(alphaPath0))
-			anAlphaImage = GetImage(alphaPath0, false);
-
-		const auto slashEnd = (aLastSlashPos != std::string::npos) ? aLastSlashPos + 1 : 0;
-		const std::string alphaPath1 = theFilename.substr(0, slashEnd) + "_" +
-			theFilename.substr(slashEnd);
-
-		if (FastFileExists(alphaPath1))
-			anAlphaImage = GetImage(alphaPath1, false);
+		anAlphaImage = GetImage(aFilename + "_", false);
 
 		if (!anAlphaImage)
 		{
-			const std::string alphaPath2 = theFilename + "_";
-			if (FastFileExists(alphaPath2))
-				anAlphaImage = GetImage(alphaPath2, false);
+			const auto aBaseSlashPos = aFilename.rfind('/');
+			const auto slashEnd = (aBaseSlashPos != std::string::npos) ? aBaseSlashPos + 1 : 0;
+			const std::string alphaPath = aFilename.substr(0, slashEnd) + "_" + aFilename.substr(slashEnd);
+			anAlphaImage = GetImage(alphaPath, false);
 		}
 	}
 
