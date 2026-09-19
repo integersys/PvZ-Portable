@@ -170,7 +170,7 @@ canvas#canvas {
     <p style="font-size: 0.85em; color: #888; font-style: italic; line-height: 1.4; max-width: 600px; margin: 0 auto 1.5em auto;">Disclaimer: This is a community-driven web port of the Sewer-Cyn build. It is not affiliated with, authorized, or endorsed by PopCap Games or Electronic Arts. Sewer-Cyn resources AND original PvZ GOTY game files are not distributed by this website. You must legally acquire these resources yourself.</p>
 
     <div id="drop-zone">
-        <p id="drop-zone-title">📂 Drop your PvZ Sewer-Cyn Edition resources here</p>
+        <p id="drop-zone-title">Drop your PvZ Sewer-Cyn Edition resources here</p>
         <p id="drop-zone-subtitle">Drag and drop the <code>PvZ Sewer-Cyn Edition</code> ZIP, or click the Import button below:</p>
         <div id="resource-split-actions">
             <button id="browse-zip-btn" class="resource-action" type="button">
@@ -201,7 +201,7 @@ canvas#canvas {
 
 <div id="canvas-container">
     <div id="save-toolbar">
-        <button id="save-export-btn" title="Export saves as ZIP">💾 Export Saves</button>
+        <button id="save-export-btn" title="Export saves as ZIP">Export Saves</button>
     </div>
     <canvas id="canvas" width="1066" height="600" tabindex="0"></canvas>
 </div>
@@ -298,17 +298,25 @@ const SEWERCYN_RESOURCE_ROOTS = new Set([
 ]);
 
 function normalizeResourcePath(path) {
-    const cleanPath = path.replace(/\\/g, '/').replace(/^\/+/, '');
-    const parts = cleanPath.split('/').filter(Boolean);
-    if (parts.length === 0) return '';
-    const sewerRootIndex = parts.findIndex(part => part.toLowerCase() === 'pvz sewer-cyn edition');
-    if (sewerRootIndex >= 0) {
-        const resourceParts = parts.slice(sewerRootIndex + 1);
-        if (resourceParts.length === 0 || !SEWERCYN_RESOURCE_ROOTS.has(resourceParts[0].toLowerCase())) return '';
-        return resourceParts.join('/');
+    const parts = path
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "")
+        .split("/")
+        .filter(Boolean);
+
+    if (parts.length === 0) {
+        return "";
     }
-    if (!SEWERCYN_RESOURCE_ROOTS.has(parts[0].toLowerCase())) return '';
-    return parts.join('/');
+
+    const resourceRootIndex = parts.findIndex(
+        part => SEWERCYN_RESOURCE_ROOTS.has(part.toLowerCase())
+    );
+
+    if (resourceRootIndex < 0) {
+        return "";
+    }
+
+    return parts.slice(resourceRootIndex).join("/");
 }
 
 function normalizeSaveImportPath(path) {
@@ -325,7 +333,7 @@ function normalizeSaveImportPath(path) {
 async function importResourceZip(file, btn) {
     btn.disabled = true;
     const oldHTML = btn.innerHTML;
-    btn.textContent = '⏳ Importing ZIP…';
+    btn.textContent = 'Importing ZIP…';
     try {
         const zip = await JSZip.loadAsync(file);
         const entries = Object.keys(zip.files).filter(name => !zip.files[name].dir);
@@ -335,6 +343,13 @@ async function importResourceZip(file, btn) {
             if (!destPath) continue;
             const data = await zip.files[name].async('uint8array');
             collectedFiles.set(destPath, new File([data], destPath.split('/').pop()));
+        }
+
+        if (collectedFiles.size === 0) {
+            throw new Error(
+                "No Sewer-Cyn resource files were recognized in this ZIP. " +
+                "Expected folders such as properties, images, compiled, reanim, sounds, or music."
+            );
         }
 
         const aliases = [
@@ -566,7 +581,7 @@ function collectSaveFiles(dir) {
 async function exportSaves() {
     const btn = document.getElementById('save-export-btn');
     btn.disabled = true;
-    btn.textContent = '⏳ Exporting…';
+    btn.textContent = 'Exporting…';
     try {
         await ensureSaveFsReady();
         await syncSaves();
@@ -590,7 +605,7 @@ async function exportSaves() {
         alert('Export failed: ' + e.message);
     } finally {
         btn.disabled = false;
-        btn.textContent = '💾 Export Saves';
+        btn.textContent = 'Export Saves';
     }
 }
 
@@ -598,7 +613,7 @@ async function importSaves(file, btn) {
     await ensureSaveFsReady();
     btn.disabled = true;
     const oldText = btn.textContent;
-    btn.textContent = '⏳ Importing…';
+    btn.textContent = 'Importing…';
     try {
         const zip = await JSZip.loadAsync(file);
         const entries = Object.keys(zip.files).filter(n => !zip.files[n].dir);
@@ -650,7 +665,7 @@ async function importSaveDirectory(files, btn) {
     await ensureSaveFsReady();
     btn.disabled = true;
     const oldText = btn.textContent;
-    btn.textContent = '⏳ Importing…';
+    btn.textContent = 'Importing…';
     try {
         let importedCount = 0;
         let latestModified = 0;
@@ -701,7 +716,7 @@ async function clearSaves(btn) {
     if (!confirm('This will permanently delete ALL save data from your browser.\nThis cannot be undone. Continue?')) return;
     btn.disabled = true;
     const oldText = btn.textContent;
-    btn.textContent = '⏳ Clearing…';
+    btn.textContent = 'Clearing…';
     try {
         const files = collectSaveFiles('/saves');
         for (const f of files) {
