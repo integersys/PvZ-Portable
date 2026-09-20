@@ -291,6 +291,10 @@ void SeedPacketDrawSeed(Graphics* g, float x, float y, SeedType theSeedType, See
 
 void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost)
 {
+    if (Sexy::IMAGE_SEEDS && Sexy::IMAGE_SEEDS->mHeight == 70 && Sexy::IMAGE_SEEDS->mWidth % SEED_PACKET_WIDTH == 0)
+    {
+        Sexy::IMAGE_SEEDS->mNumCols = Sexy::IMAGE_SEEDS->mWidth / SEED_PACKET_WIDTH;
+    }
 	SeedType aSeedType = theSeedType;
 	if (aSeedType == SeedType::SEED_IMITATER && theImitaterType != SeedType::SEED_NONE)
 	{
