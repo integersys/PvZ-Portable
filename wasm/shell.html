@@ -298,25 +298,16 @@ const SEWERCYN_RESOURCE_ROOTS = new Set([
 ]);
 
 function normalizeResourcePath(path) {
-    const parts = path
-        .replace(/\\/g, "/")
-        .replace(/^\/+/, "")
-        .split("/")
-        .filter(Boolean);
-
-    if (parts.length === 0) {
-        return "";
+    const parts = path.replace(/\\/g, "/").replace(/^\/+/, "").split("/").filter(Boolean);
+    if (parts.length === 0) return "";
+    const debugIndex = parts.findIndex(part => part.toLowerCase() === "debug");
+    if (debugIndex >= 0) {
+        const resourceRootIndex = debugIndex + 1;
+        if (resourceRootIndex >= parts.length || !SEWERCYN_RESOURCE_ROOTS.has(parts[resourceRootIndex].toLowerCase())) return "";
+        return parts.slice(resourceRootIndex).join("/");
     }
-
-    const resourceRootIndex = parts.findIndex(
-        part => SEWERCYN_RESOURCE_ROOTS.has(part.toLowerCase())
-    );
-
-    if (resourceRootIndex < 0) {
-        return "";
-    }
-
-    return parts.slice(resourceRootIndex).join("/");
+    if (SEWERCYN_RESOURCE_ROOTS.has(parts[0].toLowerCase())) return parts.join("/");
+    return "";
 }
 
 function normalizeSaveImportPath(path) {
