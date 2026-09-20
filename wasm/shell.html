@@ -354,7 +354,8 @@ async function importResourceZip(file, btn) {
 
         const aliases = [
             ['compiled/reanim/TwinSunFlower.reanim.compiled', 'compiled/reanim/TwinSunflower.reanim.compiled'],
-            ['compiled/reanim/Iceshroom.reanim.compiled', 'compiled/reanim/IceShroom.reanim.compiled']
+            ['compiled/reanim/Iceshroom.reanim.compiled', 'compiled/reanim/IceShroom.reanim.compiled'],
+            ['reanim/CrazyDave_body1_.png', 'reanim/CRAZYDAVE_BODY1_.png']
         ];
         for (const [sourcePath, aliasPath] of aliases) {
             if (collectedFiles.has(sourcePath) && !collectedFiles.has(aliasPath)) {
